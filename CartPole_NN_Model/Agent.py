@@ -34,7 +34,7 @@ class Agent:
         self.model.add(keras.layers.Dense(units=self.action_size, activation="linear"))
         
         # Compilation of the model
-        self.model.compile(loss='mse', optimizer=keras.Adam(learning_rate=self.alpha))
+        self.model.compile(loss='mse', optimizer=keras.optimizers.Adam(learning_rate=self.alpha))
 
     def _save_model(self, model_name):
         # TODO: create save function
@@ -50,7 +50,7 @@ class Agent:
 
     def _act(self, state):
         # TODO: create act function
-        exp_exp_random = random.random(0, 1)
+        exp_exp_random = random.uniform(0, 1)
 
         if exp_exp_random > self.epsilon:
             # Exploite
@@ -107,13 +107,14 @@ class Agent:
         # TODO: create train function
         self._build_model()
         for i in range(n_train_episodes):
-            state, _ = env.reset()
+            state = env.reset()
             total_reward = 0
             done = False
 
             while not done:
                 action = self._act(state)
-                next_state, reward, done, _, _ = env.step(action)
+                print(action)
+                next_state, reward, done, _ = env.step(action)
                 total_reward += reward
                 self._update_memory(state, action, reward, next_state, done)
                 self._learn(batch_size)
@@ -128,7 +129,7 @@ class Agent:
         # TODO: create test function
         self.model = self._load_model(model_name)
         for i in range(n_test_episodes):
-            state, _ = env.reset()
+            state = env.reset()
             total_reward = 0
             done = False
 
@@ -136,6 +137,6 @@ class Agent:
                 state = self._reshape_state(state)
                 values = self.model.predict(state, verbose=0)
                 action = np.argmax(values[0])
-                next_state, reward, done, _, _ = env.step(action)
+                next_state, reward, done, _ = env.step(action)
                 total_reward += reward
                 state = next_state
